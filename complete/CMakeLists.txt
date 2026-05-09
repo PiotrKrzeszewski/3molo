@@ -61,7 +61,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 # Adds a plugin target.
-set(TREMOLO_PLUGIN_NAME "Tremolo")
+set(TREMOLO_PLUGIN_NAME "3molo")
 juce_add_plugin(
   TremoloCoursePlugin
   PRODUCT_NAME
@@ -69,11 +69,11 @@ juce_add_plugin(
   VERSION
     0.0.0 # 0 forces AU hosts to always refresh
   COMPANY_NAME
-    "WolfSound"
+    "FlintedAudio"
   PLUGIN_MANUFACTURER_CODE
-    Wfsd
+    Ftad
   PLUGIN_CODE
-    Trcp
+    Trbn
   FORMATS
     Standalone
     AU
