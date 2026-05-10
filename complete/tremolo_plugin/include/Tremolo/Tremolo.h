@@ -5,6 +5,12 @@ enum class ApplySmoothing { no, yes };
 
 class Tremolo {
 public:
+
+  Tremolo()
+  {
+    lfo.setFrequency(5.f, ture);
+  }
+
   enum class LfoWaveform : size_t {
     sine = 0,
     triangle = 1,
@@ -121,6 +127,9 @@ public:
   }
 
 private:
+  juce::dsp::Oscillator<float> lfo{[](auto phase){return std::sin(phase);}};
+
+
   static constexpr auto modulationDepth = 0.4f;
 
   static float triangle(float phase) {
