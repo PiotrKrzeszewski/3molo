@@ -7,6 +7,7 @@ public:
   enum class LfoWaveform : size_t
   {
     sine = 0,
+    triangle = 1,
   };
   Tremolo()
   {
@@ -30,10 +31,17 @@ public:
       lfo.prepare(processSpec);
     }
   }
-
+  //funkcja ustawiajaca aktualny typ waveform
+  void setLfoWaveform(LfoWaveform waveform)
+  {
+    jassert(waveform == LfoWaveform::sine || waveform == LfoWaveform::triangle); //jesli to nie bedzie zadne z powyzszych, program sie zatrzyma kontrolowanie, dziala tylko w debug
+    lfoToSet = waveform;
+  }
 
   void process(juce::AudioBuffer<float>& buffer) noexcept {
     // for each frame
+    updateLfoWaveform(); //aktualizuje typ waveform tylko przed procesowaniem nastepnego bufora, co jest bezpieczniejszym rozwiazaniem
+
     for (const auto frameIndex : std::views::iota(0, buffer.getNumSamples())) {
 
       // obliczanie jednej probki na jedna ramke
@@ -72,12 +80,22 @@ public:
 
 private:
 
+  //funkcja przebiegu trojkatnego
+  static float triangle(float phase)
+  {
+    const auto ft = phase/juce::MathConstants<float>::twoPi;
+    return 4.f*std::abs(ft-std::floor(ft+0.5f))-1.f;
+  }
+
   float getNextLfoValue()
   {
     return lfos[juce::toUnderlyingType(currentLfo)].processSample(0.f);
   }
 
-
+  void updateLfoWaveform()
+  {
+    if (currentLfo != lfoToSet) currentLfo = lfoToSet;
+  }
 
   //funkcja lambda:
   //[] - przechwytywane zmienne zewnetrzene (jesli takich potrzebujemy)
@@ -85,7 +103,13 @@ private:
   //{} - ciało funkcji
 
   //kontener zawierajacy typy lfo
-  std::array<juce::dsp::Oscillator<float>, 1u> lfos{ [](auto phase){return std::sin(phase);}};
+  std::array<juce::dsp::Oscillator<float>, 2u> lfos
+  {
+    juce::dsp::Oscillator<float>{[](auto phase){return std::sin(phase);}},
+    juce::dsp::Oscillator<float>{triangle},
+  };
+
   LfoWaveform currentLfo = LfoWaveform::sine; //flaga umozliwiajaca okreslenie jaki typ lfo jest wybrany
+  LfoWaveform lfoToSet = currentLfo;
 };
 }  // namespace tremolo
